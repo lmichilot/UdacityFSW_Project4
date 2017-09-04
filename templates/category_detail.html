@@ -116,13 +116,23 @@
                   <td>
                     <a href="#" class="show-descript" role="button" data-title="{{item.title}}" data-descript="{{ item.description }}">
                     {{item.title}}
-                  </a>
+                  </a>  
                   </td>
                   {% if user!=None %}
-                  <td class="text-center"><a class="btn btn-primary btn-xs" href="{{ url_for('getEditItem', item_title=item.title) }}"><span class="glyphicon glyphicon-pencil"></span></a></td>
                   <td class="text-center">
-                    <a href="#" class="confirm-delete btn btn-danger btn-xs" role="button" data-title="{{item.title}}" data-id="{{ item.title }}"><span class="glyphicon glyphicon-trash"></span>
-                    </a>
+                    <a title="You have access to manage your own items" class="btn btn-primary btn-xs" href="{{" javascript: myAuthModal();
+                      " if authid!=item.user_id else url_for('getEditItem', item_title=item.title) }}">
+                        <span class="glyphicon glyphicon-pencil"></span>
+                      </a>
+                  </td>
+                  <td class="text-center">
+                    {% if authid!=item.user_id %}
+                    <a href="javascript: myAuthModal();" class="confirm-delete btn btn-danger btn-xs" role="button" data-title="{{item.title}}"
+                      data-id="{{ item.title }}"><span class="glyphicon glyphicon-trash"></span>
+                    </a> {% else %}
+                    <a href="javascript:myAuthModalDelete('{{item.title}}')" class="confirm-delete btn btn-danger btn-xs" role="button" data-title="{{item.title}}"
+                      data-id="{{ item.title }}"><span class="glyphicon glyphicon-trash"></span>
+                   </a> {% endif %}
                   </td>
                   {% endif %}
                 </tr>
@@ -135,6 +145,23 @@
     </div>
   </div>
 
+  <div class="modal fade" id="myAuthModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header alert-info">
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            <h4 class="modal-title">ACCESS DENIED</h4>
+          </div>
+          <div class="modal-body wordwrapdiv">
+            <p>You have access to manage your own items, please review.</p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    
   <div class="modal fade" id="myDescriptModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog">
       <div class="modal-content">
@@ -171,19 +198,17 @@
   </div>
 
   <script>
-    $('.confirm-delete').on('click', function (e) {
-      e.preventDefault();
-      var id = $(this).data('id');
-      $('#myDeleteModal').data('id', id).modal('show');
-    });
+    function myAuthModal() {
+      $('#myAuthModal').modal('show');
+      return false;
+    }
 
-    $('#myDeleteModal').on('show.bs.modal', function () {
-      var tit = $('.confirm-delete').data('title');
+    function myAuthModalDelete(ctrl) {
       $('#myDeleteModa').css('height', $('#myDeleteModa').height());
-      $('#myDeleteModal .modal-body p').html("Are you sure to delete the item: " + '<b>' + tit + '</b>' + ' ?');
-      var id = $(this).data('id'),
-        removeBtn = $(this).find('.danger');
-    })
+      $('#myDeleteModal').data('id', ctrl).modal('show');
+      $('#myDeleteModal .modal-body p').html("Are you sure to delete the item: " + '<b>' + ctrl + '</b>' + ' ?');
+      $('#myDeleteModal').modal('show');
+    }
 
     $('#btnDelete').click(function () {
       showLoading();
@@ -258,6 +283,10 @@
         });
       }
     }
+
+    $(document).ready(function () {
+      $('[data-toggle="tooltip"]').tooltip();
+    });
 
     var waitingDialog = waitingDialog || (function ($) {
       'use strict';

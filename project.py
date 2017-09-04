@@ -58,6 +58,12 @@ def identityExist(title):
     return len(results) > 0
 
 
+def createdBy(Item):
+    """ Checks if an item exists with the same unique title in db """
+    results = session.query(CategoryItem.user_id).filter_by(id=Item.id).one()
+    return results[0]
+
+
 def routeToUrl(sPage):
     """ Main Page """
     return redirect(url_for(sPage))
@@ -73,6 +79,7 @@ def lostSession():
     del catalog_session['access_token']
     del catalog_session['gplus_id']
     del catalog_session['username']
+    del catalog_session['authid']
     return routeToUrl('getHomePage')
 
 
@@ -82,7 +89,8 @@ def queryitems(mquery):
         query = session.query(CategoryItem.id,
                               CategoryItem.title,
                               CategoryItem.description,
-                              Category.name) \
+                              Category.name,
+                              CategoryItem.user_id,) \
             .join(Category, Category.id == CategoryItem.category_id) \
             .order_by(desc(CategoryItem.date)).all()
     elif mquery == 'categories':
@@ -115,8 +123,10 @@ def getHomePage():
 
     try:
         user = catalog_session['username']
+        authid = catalog_session['authid']
     except KeyError:
         user = None
+        authid = ''
 
     if (request.method == 'GET'):
         STATE = ''.join(random.choice(string.ascii_uppercase +
@@ -132,6 +142,7 @@ def getHomePage():
             items=latest_items,
             category_names='',
             user=user,
+            authid=authid,
             STATE=STATE,
             itemscount=len(latest_items)
         )
@@ -189,6 +200,7 @@ def getHomePage():
         answer = requests.get(userinfo_url, params=params)
         data = answer.json()
         catalog_session['username'] = data['name']
+        catalog_session['authid'] = data['id']
         return routeToUrl('getHomePage')
 
 
@@ -219,13 +231,16 @@ def getCategoryItems(category_name):
 
     try:
         user = catalog_session['username']
+        authid = catalog_session['authid']
     except KeyError:
         user = None
+        authid = ''
 
     return render_template(
         'category_detail.html',
         selected_category=selected_category,
         user=user,
+        authid=authid,
         items=items,
         categories=categories,
         itemscount=len(items)
@@ -251,7 +266,6 @@ def getCreateItem():
         user = catalog_session['username']
     except KeyError:
         user = None
-
     if request.method == 'POST':
         title = None
         description = None
@@ -279,9 +293,9 @@ def getCreateItem():
             flash("Please enter a different title. Item " +
                   title + " already exists.")
             return redirect(url_for('getCreateItem'))
-
         category_id = request.form['category_id']
-        oCategoryItem = CategoryItem(title, description, category_id)
+        authid = catalog_session['authid']
+        oCategoryItem = CategoryItem(title, description, category_id, authid)
         session.add(oCategoryItem)
         session.commit()
 
@@ -305,6 +319,11 @@ def getEditItem(item_title):
     editedItem = session.query(CategoryItem).filter_by(title=item_title).one()
     category = session.query(Category).filter_by(
         id=editedItem.category_id).one()
+    actualuser = catalog_session['authid']
+    registerby = createdBy(editedItem)
+    if (actualuser != registerby):
+        flash("You have access to manage your own items, please review.")
+        return redirect(url_for('getHomePage'))
 
     categories = queryitems('allcategories')
     if request.method == 'POST':
@@ -361,15 +380,14 @@ def gdisconnect():
         del catalog_session['access_token']
         del catalog_session['gplus_id']
         del catalog_session['username']
+        del catalog_session['authid']
         response = make_response(
             json.dumps('Successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
         return routeToUrl('getHomePage')
     else:
-        response = make_response(json.dumps(
-            'Failed to revoke token for given user.'))
-        response.headers['Content-Type'] = 'application/json'
-        return response
+        lostSession()
+        return routeToUrl('getHomePage')
 
 if __name__ == '__main__':
     app.secret_key = 'secret'

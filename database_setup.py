@@ -35,10 +35,11 @@ class Category(Base):
 
 class CategoryItem(Base):
     """ Category Item Table """
-    def __init__(self, title, description, category_id):
+    def __init__(self, title, description, category_id, user_id):
         self.title = title
         self.description = description
         self.category_id = category_id
+        self.user_id = user_id
 
     __tablename__ = 'category_item'
 
@@ -46,6 +47,7 @@ class CategoryItem(Base):
     title = Column(String(45), nullable=False)
     description = Column(String(250), nullable=False)
     category_id = Column(Integer, ForeignKey('category.id'))
+    user_id = Column(String(250), nullable=False)
     date = Column(DateTime,
                   default=datetime.datetime.now(),
                   onupdate=datetime.datetime.now()
