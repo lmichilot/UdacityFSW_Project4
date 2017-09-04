@@ -33,7 +33,7 @@ This project consists for the following files:
 - Install the dependency libraries:
   [`Flask`,`Sqlalchemy`,`Requests`,`Oauth2client`]
   by running `pip install -r requirements.txt`
-- Create the database by running : `database_setup.py`
+- Create the database by running : `python database_setup.py`
 - Seeding the database by running : `python database_seed.py`
 - Run `python project.py` (it will run on port 8094)
  

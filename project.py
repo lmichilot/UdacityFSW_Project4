@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 # Flask
 from flask import Flask, render_template, request, redirect, url_for
 from flask import jsonify, flash, Response
@@ -37,6 +38,8 @@ session = DBSession()
 # ----------------------------------------------------------------------------
 #                       Helper Methods
 # ----------------------------------------------------------------------------
+
+
 def authGranted(f):
     """ Checks if the user is logged in or not """
     @wraps(f)
@@ -54,20 +57,24 @@ def identityExist(title):
     results = session.query(CategoryItem).filter_by(title=title).all()
     return len(results) > 0
 
+
 def routeToUrl(sPage):
     """ Main Page """
     return redirect(url_for(sPage))
+
 
 def mkResponse(text, number):
     """ Return response """
     return make_response(json.dumps(text), 401)
 
+
 def lostSession():
     """ Clean response """
     del catalog_session['access_token']
     del catalog_session['gplus_id']
-    del catalog_session['username']    
+    del catalog_session['username']
     return routeToUrl('getHomePage')
+
 
 def queryitems(mquery):
     query = None
@@ -109,9 +116,8 @@ def getHomePage():
     try:
         user = catalog_session['username']
     except KeyError:
-        user = None  
+        user = None
 
-     
     if (request.method == 'GET'):
         STATE = ''.join(random.choice(string.ascii_uppercase +
                                       string.digits) for x in range(32))
@@ -143,7 +149,8 @@ def getHomePage():
             oauth_flow.redirect_uri = 'postmessage'
             credentials = oauth_flow.step2_exchange(code)
         except FlowExchangeError:
-            response = mkResponse('Failed to upgrade the authorization code.', 401)
+            response = mkResponse(
+                'Failed to upgrade the authorization code.', 401)
             response.headers['Content-Type'] = 'application/json'
             return response
 
@@ -153,7 +160,7 @@ def getHomePage():
                % access_token)
         h = httplib2.Http()
         result = json.loads(h.request(url, 'GET')[1])
-        
+
         # Error ?
         if result.get('error') is not None:
             lostSession()
@@ -224,6 +231,7 @@ def getCategoryItems(category_name):
         itemscount=len(items)
     )
 
+
 @app.route('/catalog/items/<item_title>/')
 def getItemDetails(item_title):
     """ Returns a category item given its title """
@@ -232,6 +240,7 @@ def getItemDetails(item_title):
     return render_template(
         'item_detail.html', item=item, category=category
     )
+
 
 @app.route('/catalog/items/new', methods=['GET', 'POST'])
 @authGranted
@@ -288,6 +297,7 @@ def getCreateItem():
             'create_item.html', categories=categories, user=user
         )
 
+
 @app.route('/catalog/items/<item_title>/edit', methods=['GET', 'POST'])
 @authGranted
 def getEditItem(item_title):
@@ -329,6 +339,7 @@ def deleteItem(item_title):
     session.delete(itemToDelete)
     session.commit()
     return routeToUrl('getHomePage')
+
 
 @app.route('/gdisconnect')
 def gdisconnect():
