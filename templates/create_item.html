@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="google-signin-client_id" content="994254899045-vrhl86p5nok2ot6s8hjbt41on80n8re5.apps.googleusercontent.com">
+  <title>Udacity - Create</title>
+  <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css">
+  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+  <script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
+  <link rel=stylesheet type=text/css href="{{ url_for('static', filename='styles.css') }}">
+  <link rel=stylesheet type=text/css href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+
+<body class="fullbleed layout vertical">
+  <nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+      <div class="navbar-header">
+        <div id="divLogo">
+          <a class="pull-right" href="/">
+            <span>
+            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="30" viewBox="0 0 50 30" alt="Udacity">
+              <g fill="none" fill-rule="evenodd">             
+                <path id="mark" fill="#FFFFFF" d="M29 .5l1 .5v13c0 5.551887-2.8897 8.695692-5.995216 10.099885L24.0094 24.1l-7.620963 4.388562c-.05877.03456-.11776.068527-.176957.101902l-.08642.049764.001806-.00254C14.48289 29.545895 12.684682 30 11 30 6 30 0 26 0 18V6l2 1v11c0 8 6 10 9 10 1.858706 0 4.86901-.76773 6.89043-3.254517C14.181726 23.872636 10 20.678703 10 14V2.2L2 7 0 6l10-6 1 .5 1 .5v13c0 6.939958 4.515283 8.612086 7.017542 8.933368C19.625786 21.62159 20 19.997902 20 18V5l2 1v12c0 1.852645-.321777 3.49077-.878395 4.91438C23.648223 22.549217 28 20.813144 28 14V2.25L22 6l-2-1 8-5 1 .5z"></path>
+                Catalog APP
+              </g>
+            </svg>
+          </span>
+            <span class="divLogoText pull-right" >CATALOG APP</span>
+             </a>
+        </div>
+
+      </div>
+      <div class="navbar-collapse collapse">
+        <ul class="nav navbar-nav navbar-right">
+          {% if user==None %}
+          <li>
+            <div id="signinButton">
+              <span class="g-signin" data-scope="openid" data-clientid="994254899045-vrhl86p5nok2ot6s8hjbt41on80n8re5.apps.googleusercontent.com"
+                data-redirecturi="catalog" data-accesstype="offline" data-cookiepolicy="single_host_origin" data-callback="signInCallback"
+                data-approvalprompt="force"> </span>
+            </div>
+          </li>
+          {% else %}
+          <li><a href="">User: {{ user }}</a></li>
+          <li><a onclick="showLoading();" href="{{ url_for('gdisconnect') }}">Sign out</a></li>
+          {% endif %}
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+
+  <!-- Displaying flash messages -->
+  <div class="container">
+
+    <div class="row">
+      <div>
+        {% with messages = get_flashed_messages() %} {% if messages %}
+        <div class="alert alert-warning" role="alert">
+          <h4 class="alert-heading">Validation Summary</h4>
+          {% for message in messages %}
+          <li> <strong> {{ message }} </strong> </li>
+          {% endfor %}
+        </div>
+        {% endif %} {% endwith %}
+      </div>
+    </div>
+
+
+    <div class="container">
+
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h5>CREATE NEW ITEM<span class="pull-right"><a href="{{ url_for('routeToHome') }}"> Go Home Page </a></span></h5>
+        </div>
+        <div class="panel-body">
+          <form class="well form-horizontal" action="{{ url_for('getCreateItem')}}" method='post'>
+            <fieldset>
+
+              <!-- Select Basic -->
+
+              <div class="form-group">
+                <label class="col-md-2 control-label">Category</label>
+                <div class="col-md-8 selectContainer">
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-list"></i></span>
+                    <select name="category_id" class="form-control selectpicker">
+                    {% for category in categories %}
+                      <option value="{{category.id}}">{{ category.name }}</option>
+                    {% endfor %}
+                  </select>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Text input-->
+
+              <div class="form-group">
+                <label class="col-md-2 control-label">Title</label>
+                <div class="col-md-8 inputGroupContainer">
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                    <input type="text" name='title' maxlength="45" class="form-control" placeholder="Title"> <br>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Text area -->
+
+              <div class="form-group">
+                <label class="col-md-2 control-label">Description</label>
+                <div class="col-md-8 inputGroupContainer">
+                  <div class="input-group">
+                    <span class="input-group-addon"><i class="glyphicon glyphicon-pencil"></i></span>
+                    <textarea name="description" class="form-control" placeholder="Description" maxlength="250" rows="8" cols="40"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Button -->
+              <div class="form-group">
+                <label class="col-md-2 control-label"></label>
+                <div class="col-md-8">
+                  <label class="custom-control custom-checkbox">
+                    <input name="chksavenew" type="checkbox" class="custom-control-input">
+                    <span class="custom-control-indicator"></span>
+                    <span class="custom-control-description">Save and create new item</span>
+                  </label>
+                </div>
+              </div>
+
+              <!-- Button -->
+              <div class="form-group">
+                <label class="col-md-2 control-label"></label>
+                <div class="col-md-8">
+                  <button type="submit" class="btn btn-success">Save <span class="glyphicon glyphicon-send"></span></button>
+                </div>
+              </div>
+
+            </fieldset>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- /.container -->
+  </div>
+
+
+  </div>
+
+  <div class="modal fade" id="myDescriptModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header alert-info">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"></h4>
+        </div>
+        <div class="modal-body wordwrapdiv">
+          <p></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal fade" id="myDeleteModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header alert-danger">
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+          <h4 class="modal-title"><b>DELETE ITEM</b></h4>
+        </div>
+        <div class="modal-body">
+          <p></p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" id="btnDelete">Delete Item</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    $('.confirm-delete').on('click', function (e) {
+      e.preventDefault();
+      var id = $(this).data('id');
+      $('#myDeleteModal').data('id', id).modal('show');
+    });
+
+    $('#myDeleteModal').on('show.bs.modal', function () {
+      var tit = $('.confirm-delete').data('title');
+      $('#myDeleteModa').css('height', $('#myDeleteModa').height());
+      $('#myDeleteModal .modal-body p').html("Are you sure to delete the item: " + '<b>' + tit + '</b>' + ' ?');
+      var id = $(this).data('id'),
+        removeBtn = $(this).find('.danger');
+    })
+
+    $('#btnDelete').click(function () {
+      showLoading();
+      var id = $('#myDeleteModal').data('id');
+      sURL = 'catalog/items/' + id + '/delete';
+      $.ajax({
+        type: 'POST',
+        url: sURL,
+        processData: false,
+        data: { item_title: id },
+        contentType: 'application/octet-stream;charset=utf - 8',
+        success: function (result) {
+          if (result) {
+            waitingDialog.hide();
+            window.location.href = "/catalog";
+          }
+        },
+        error: function (xhr, ajaxOptions, thrownError) {
+          waitingDialog.hide();
+          alert(xhr.status);
+          alert(thrownError);
+        }
+      });
+      $('#myModal').modal('hide');
+    });
+
+    $('#myDescriptModal').on('show.bs.modal', function () {
+      var des = $('.show-descript').data('descript');
+      var tit = $('.show-descript').data('title');
+      $('#myDescriptModal .modal-header h4').html('<b><u>' + tit + '</u></b>');
+      $('#myDescriptModal .modal-body p').html('<u>DESCRIPTION:</u><br><br>' + des);
+    })
+
+    $('.show-descript').on('click', function (e) {
+      e.preventDefault();
+      var id = $(this).data('id');
+      $('#myDescriptModal').data('id', id).modal('show');
+    });
+
+    function showLoading(text) {
+      waitingDialog.show(text, { dialogSize: 'sm', progressType: 'info' });
+    }
+
+    function signInCallback(authResult) {
+      if (authResult['code']) {
+        showLoading();
+        $('#signinButton').attr('style', 'display: none');
+        $.ajax({
+          type: 'POST',
+          url: '/catalog?state={{STATE}}',
+          processData: false,
+          data: authResult['code'],
+          contentType: 'application/octet-stream;charset=utf - 8',
+          success: function (result) {
+            if (result) {
+              $('#result').html('Login Successful!</br>' + result + '</br>Redirecting...')
+              window.location.href = "/catalog";
+            } else
+              if (authResult['error']) {
+                console.log('There was an error: ' + authResult['error']);
+              }
+              else {
+                $('#result').html('Request failed.');
+              }
+            waitingDialog.hide()
+          },
+          error: function (xhr, ajaxOptions, thrownError) {
+            waitingDialog.hide();
+            alert(xhr.status);
+            alert(thrownError);
+          }
+        });
+      }
+    }
+
+    var waitingDialog = waitingDialog || (function ($) {
+      'use strict';
+
+      // Creating modal dialog's DOM
+      var $dialog = $(
+        '<div class="modal fade" data-backdrop="static" data-keyboard="false" tabindex="-1" role="dialog" aria-hidden="true" style="padding-top:15%; overflow-y:visible;">' +
+        '<div class="modal-dialog modal-m">' +
+        '<div class="modal-content">' +
+        '<div class="modal-header"><h3 style="margin:0;"></h3></div>' +
+        '<div class="modal-body">' +
+        '<div class="progress progress-striped active" style="margin-bottom:0;"><div class="progress-bar" style="width: 100%; height:20px;"></div></div>' +
+        '</div>' +
+        '</div></div></div>');
+
+      return {
+        /**
+         * Opens our dialog
+         * @param message Custom message
+         * @param options Custom options:
+         * 				  options.dialogSize - bootstrap postfix for dialog size, e.g. "sm", "m";
+         * 				  options.progressType - bootstrap postfix for progress bar type, e.g. "success", "warning".
+         */
+        show: function (message, options) {
+          // Assigning defaults
+          if (typeof options === 'undefined') {
+            options = {};
+          }
+          if (typeof message === 'undefined') {
+            message = 'Loading';
+          }
+          var settings = $.extend({
+            dialogSize: 'm',
+            progressType: '',
+            onHide: null // This callback runs after the dialog was hidden
+          }, options);
+
+          // Configuring dialog
+          $dialog.find('.modal-dialog').attr('class', 'modal-dialog').addClass('modal-' + settings.dialogSize);
+          $dialog.find('.progress-bar').attr('class', 'progress-bar');
+          if (settings.progressType) {
+            $dialog.find('.progress-bar').addClass('progress-bar-' + settings.progressType);
+          }
+          $dialog.find('h3').text(message);
+          // Adding callbacks
+          if (typeof settings.onHide === 'function') {
+            $dialog.off('hidden.bs.modal').on('hidden.bs.modal', function (e) {
+              settings.onHide.call($dialog);
+            });
+          }
+          // Opening dialog
+          $dialog.modal();
+        },
+        /**
+         * Closes dialog
+         */
+        hide: function () {
+          $dialog.modal('hide');
+        }
+      };
+
+    })(jQuery);
+  </script>
+  <script src="https://apis.google.com/js/platform.js?onload=renderButton"></script>
+</body>
+
+</html>

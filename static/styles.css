@@ -1,0 +1,38 @@
+body > .container {
+  padding-top: 60px;
+  color: #212121;
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.navbar-default {
+  background-color: #4682B4;
+}
+
+.navbar-default .navbar-nav>li>a, .navbar-default .navbar-brand {
+  color: #FFFFFF;
+}
+
+.panel-default>.panel-heading {
+  font-weight: bold;
+  background-color: #E3F3F9;
+}
+
+#signinButton {
+  padding-top: 10px;
+}
+
+#divLogo {
+  padding-top: 10px;
+}
+
+.divLogoText {
+  padding-top: 2px;
+  color: #FFFFFF;
+  font-size: 22px;
+}
+
+.wordwrapdiv
+{   
+    word-wrap: break-word;
+    justify-content: space-around;
+}
