@@ -60,7 +60,8 @@ def identityExist(title):
 
 def createdBy(Item):
     """ Checks if an item exists with the same unique title in db """
-    results = session.query(CategoryItem.user_id).filter_by(id=Item.id).one()
+    results = session.query(CategoryItem.user_id). \
+        filter_by(id=Item.id).one_or_none()
     return results[0]
 
 
@@ -225,7 +226,7 @@ def getCategoryItems(category_name):
     categories = queryitems('categories')
 
     selected_category = session.query(
-        Category).filter_by(name=category_name).one()
+        Category).filter_by(name=category_name).one_or_none()
     items = session.query(CategoryItem).filter_by(
         category_id=selected_category.id).all()
 
@@ -244,16 +245,6 @@ def getCategoryItems(category_name):
         items=items,
         categories=categories,
         itemscount=len(items)
-    )
-
-
-@app.route('/catalog/items/<path:item_title>/')
-def getItemDetails(item_title):
-    """ Returns a category item given its title """
-    item = session.query(CategoryItem).filter_by(title=item_title).one()
-    category = session.query(Category).filter_by(id=item.category_id).one()
-    return render_template(
-        'item_detail.html', item=item, category=category
     )
 
 
@@ -316,9 +307,10 @@ def getCreateItem():
 @authGranted
 def getEditItem(item_title):
     """ Handles updating an existing catalog item """
-    editedItem = session.query(CategoryItem).filter_by(title=item_title).one()
+    editedItem = session.query(CategoryItem). \
+        filter_by(title=item_title).one_or_none()
     category = session.query(Category).filter_by(
-        id=editedItem.category_id).one()
+        id=editedItem.category_id).one_or_none()
     actualuser = catalog_session['authid']
     registerby = createdBy(editedItem)
     if (actualuser != registerby):
@@ -354,7 +346,7 @@ def getEditItem(item_title):
 def deleteItem(item_title):
     """ Deletes a category item """
     itemToDelete = session.query(
-        CategoryItem).filter_by(title=item_title).one()
+        CategoryItem).filter_by(title=item_title).one_or_none()
     actualuser = catalog_session['authid']
     registerby = createdBy(itemToDelete)
     if actualuser != registerby:
