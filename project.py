@@ -323,7 +323,7 @@ def getEditItem(item_title):
     registerby = createdBy(editedItem)
     if (actualuser != registerby):
         flash("You have access to manage your own items, please review.")
-        return redirect(url_for('getHomePage'))
+        return routeToUrl('getHomePage')
 
     categories = queryitems('allcategories')
     if request.method == 'POST':
@@ -355,6 +355,12 @@ def deleteItem(item_title):
     """ Deletes a category item """
     itemToDelete = session.query(
         CategoryItem).filter_by(title=item_title).one()
+    actualuser = catalog_session['authid']
+    registerby = createdBy(itemToDelete)
+    if actualuser != registerby:
+        flash("You have access to manage your own items, please review.")
+        return routeToUrl('getHomePage')
+
     session.delete(itemToDelete)
     session.commit()
     return routeToUrl('getHomePage')
