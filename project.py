@@ -219,7 +219,7 @@ def getCatalog():
     return jsonify(Categories=output_json)
 
 
-@app.route('/catalog/categories/<category_name>/')
+@app.route('/catalog/categories/<path:category_name>/')
 def getCategoryItems(category_name):
     """ Returns items for a given category name """
     categories = queryitems('categories')
@@ -247,7 +247,7 @@ def getCategoryItems(category_name):
     )
 
 
-@app.route('/catalog/items/<item_title>/')
+@app.route('/catalog/items/<path:item_title>/')
 def getItemDetails(item_title):
     """ Returns a category item given its title """
     item = session.query(CategoryItem).filter_by(title=item_title).one()
@@ -312,7 +312,7 @@ def getCreateItem():
         )
 
 
-@app.route('/catalog/items/<item_title>/edit', methods=['GET', 'POST'])
+@app.route('/catalog/items/<path:item_title>/edit', methods=['GET', 'POST'])
 @authGranted
 def getEditItem(item_title):
     """ Handles updating an existing catalog item """
@@ -349,7 +349,7 @@ def getEditItem(item_title):
         )
 
 
-@app.route('/catalog/items/<item_title>/delete', methods=['POST'])
+@app.route('/catalog/items/<path:item_title>/delete', methods=['POST'])
 @authGranted
 def deleteItem(item_title):
     """ Deletes a category item """
